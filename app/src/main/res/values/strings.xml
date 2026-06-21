@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">RufMichAn</string>
+
+    <!-- Notification channel -->
+    <string name="channel_incoming_call">Incoming call</string>
+    <string name="channel_incoming_call_desc">Simulated incoming calls from contacts</string>
+
+    <!-- Call screen -->
+    <string name="incoming_call">Incoming call</string>
+    <string name="answer">Answer</string>
+    <string name="decline">Decline</string>
+    <string name="hang_up">Hang up</string>
+    <string name="call_ended">Call ended</string>
+    <string name="mobile">Mobile</string>
+
+    <!-- Contacts -->
+    <string name="contacts">Contacts</string>
+    <string name="add_contact">Add contact</string>
+    <string name="edit_contact">Edit contact</string>
+    <string name="no_contacts">No contacts yet.\nTap + to add one.</string>
+    <string name="contact_name">Name</string>
+    <string name="contact_phone">Phone number</string>
+    <string name="photo">Photo</string>
+    <string name="change_photo">Change photo</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="delete_contact_title">Delete contact?</string>
+    <string name="delete_contact_msg">This will also cancel all scheduled calls from this contact.</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Scheduling -->
+    <string name="scheduled">Scheduled</string>
+    <string name="schedule_call">Schedule call</string>
+    <string name="countdown">Countdown</string>
+    <string name="target_time">Target time</string>
+    <string name="minutes">min</string>
+    <string name="schedule">Schedule</string>
+    <string name="no_scheduled_calls">No calls scheduled.</string>
+    <string name="cancel_call">Cancel</string>
+    <string name="select_contact">Select a contact</string>
+    <string name="tomorrow">tomorrow</string>
+
+    <!-- Permissions -->
+    <string name="perm_exact_alarm_title">Allow exact alarms</string>
+    <string name="perm_exact_alarm_msg">RufMichAn needs permission to schedule exact alarms so that calls fire at precisely the right time.</string>
+    <string name="perm_notifications_rationale">Notifications are required for the incoming-call screen to appear.</string>
+    <string name="open_settings">Open settings</string>
+    <string name="battery_opt_title">Disable battery optimisation?</string>
+    <string name="battery_opt_msg">Exempting RufMichAn from battery optimisation ensures calls trigger reliably after long idle periods.</string>
+    <string name="later">Later</string>
+
+    <!-- Errors / hints -->
+    <string name="name_required">Name is required</string>
+    <string name="countdown_too_short">Minimum 1 minute</string>
+    <string name="time_set_to_tomorrow">Time already passed — scheduled for tomorrow</string>
+</resources>
