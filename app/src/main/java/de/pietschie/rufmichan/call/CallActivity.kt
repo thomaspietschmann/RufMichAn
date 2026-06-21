@@ -11,14 +11,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import de.pietschie.rufmichan.RufMichAnApp
+import de.pietschie.rufmichan.call.ui.CallTheme
 import de.pietschie.rufmichan.call.ui.InCallScreen
 import de.pietschie.rufmichan.call.ui.IncomingCallScreen
+import de.pietschie.rufmichan.call.ui.toCallTheme
 import de.pietschie.rufmichan.data.contact.ContactEntity
+import de.pietschie.rufmichan.data.settings.CallStyle
 import de.pietschie.rufmichan.ui.theme.RufMichAnTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -37,6 +41,7 @@ class CallActivity : ComponentActivity() {
     private var callId: Long = -1L
     private var contact by mutableStateOf<ContactEntity?>(null)
     private var answered by mutableStateOf(false)
+    private var callTheme by mutableStateOf<CallTheme>(CallStyle.SYSTEM.toCallTheme())
 
     private lateinit var proximityController: ProximityController
 
@@ -67,10 +72,12 @@ class CallActivity : ComponentActivity() {
             return
         }
 
-        // Load contact info for the UI
+        // Load contact info and the selected call-screen theme for the UI.
         activityScope.launch {
-            val repo = (application as RufMichAnApp).container.callRepository
-            val cwc = repo.getCallWithContact(callId)
+            val container = (application as RufMichAnApp).container
+            val style = container.settingsRepository.callStyle.first()
+            callTheme = style.toCallTheme()
+            val cwc = container.callRepository.getCallWithContact(callId)
             contact = cwc?.contact
             if (autoAnswer) onAnswer()
         }
@@ -82,11 +89,13 @@ class CallActivity : ComponentActivity() {
                     if (answered) {
                         InCallScreen(
                             contact = c,
+                            theme = callTheme,
                             onHangUp = ::onHangUp
                         )
                     } else {
                         IncomingCallScreen(
                             contact = c,
+                            theme = callTheme,
                             onAnswer = ::onAnswer,
                             onDecline = ::onDecline
                         )
@@ -142,8 +151,10 @@ class CallActivity : ComponentActivity() {
         contact = null
 
         activityScope.launch {
-            val repo = (application as RufMichAnApp).container.callRepository
-            val cwc = repo.getCallWithContact(callId)
+            val container = (application as RufMichAnApp).container
+            val style = container.settingsRepository.callStyle.first()
+            callTheme = style.toCallTheme()
+            val cwc = container.callRepository.getCallWithContact(callId)
             contact = cwc?.contact
             if (autoAnswer) onAnswer()
         }

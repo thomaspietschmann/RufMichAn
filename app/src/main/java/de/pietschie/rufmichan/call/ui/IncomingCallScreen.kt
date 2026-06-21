@@ -11,39 +11,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import de.pietschie.rufmichan.R
 import de.pietschie.rufmichan.data.contact.ContactEntity
-import java.io.File
+import de.pietschie.rufmichan.data.settings.CallStyle
 
 @Composable
 fun IncomingCallScreen(
     contact: ContactEntity,
+    theme: CallTheme = CallStyle.SYSTEM.toCallTheme(),
     onAnswer: () -> Unit,
     onDecline: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF1A1C1A))
+            .background(theme.background)
     ) {
         Column(
             modifier = Modifier
@@ -53,44 +49,41 @@ fun IncomingCallScreen(
         ) {
             Spacer(modifier = Modifier.height(80.dp))
 
-            // Contact avatar
             ContactAvatar(
                 photoPath = contact.photoPath,
                 name = contact.name,
-                size = 120.dp
+                size = 120.dp,
+                backgroundColor = theme.avatarBackground,
+                iconTint = theme.avatarIconTint
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Contact name
             Text(
                 text = contact.name,
-                color = Color.White,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Light
+                color = theme.nameColor,
+                fontSize = theme.nameFontSize,
+                fontWeight = theme.nameFontWeight
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Label
             Text(
                 text = contact.phoneNumber.ifBlank { stringResource(R.string.mobile) },
-                color = Color(0xFFAAAAAA),
+                color = theme.subtitleColor,
                 fontSize = 16.sp
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Status
             Text(
                 text = stringResource(R.string.incoming_call),
-                color = Color(0xFF888888),
+                color = theme.statusColor,
                 fontSize = 14.sp
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Action buttons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -98,20 +91,40 @@ fun IncomingCallScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Decline
                 CallActionButton(
                     onClick = onDecline,
-                    backgroundColor = Color(0xFFF44336),
+                    backgroundColor = theme.declineColor,
                     contentDescription = stringResource(R.string.decline),
-                    icon = { Icon(Icons.Filled.CallEnd, contentDescription = null, tint = Color.White, modifier = Modifier.size(32.dp)) }
+                    shape = theme.buttonShape,
+                    size = theme.buttonSize,
+                    iconSize = theme.buttonIconSize,
+                    labelColor = theme.labelColor,
+                    icon = {
+                        Icon(
+                            Icons.Filled.CallEnd,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(theme.buttonIconSize)
+                        )
+                    }
                 )
 
-                // Answer
                 CallActionButton(
                     onClick = onAnswer,
-                    backgroundColor = Color(0xFF3DDC84),
+                    backgroundColor = theme.answerColor,
                     contentDescription = stringResource(R.string.answer),
-                    icon = { Icon(Icons.Filled.Call, contentDescription = null, tint = Color.White, modifier = Modifier.size(32.dp)) }
+                    shape = theme.buttonShape,
+                    size = theme.buttonSize,
+                    iconSize = theme.buttonIconSize,
+                    labelColor = theme.labelColor,
+                    icon = {
+                        Icon(
+                            Icons.Filled.Call,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(theme.buttonIconSize)
+                        )
+                    }
                 )
             }
         }
@@ -119,18 +132,26 @@ fun IncomingCallScreen(
 }
 
 @Composable
-private fun CallActionButton(
+internal fun CallActionButton(
     onClick: () -> Unit,
     backgroundColor: Color,
     contentDescription: String,
+    shape: androidx.compose.ui.graphics.Shape,
+    size: androidx.compose.ui.unit.Dp,
+    iconSize: androidx.compose.ui.unit.Dp,
+    labelColor: Color,
+    modifier: Modifier = Modifier,
     icon: @Composable () -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
         IconButton(
             onClick = onClick,
             modifier = Modifier
-                .size(72.dp)
-                .clip(CircleShape)
+                .size(size)
+                .clip(shape)
                 .background(backgroundColor)
         ) {
             icon()
@@ -138,7 +159,7 @@ private fun CallActionButton(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = contentDescription,
-            color = Color(0xFFAAAAAA),
+            color = labelColor,
             fontSize = 12.sp
         )
     }
