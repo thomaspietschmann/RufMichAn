@@ -32,8 +32,10 @@
     <!-- Scheduling -->
     <string name="scheduled">Scheduled</string>
     <string name="schedule_call">Schedule call</string>
-    <string name="countdown">Countdown</string>
+    <string name="mode_seconds">Seconds</string>
+    <string name="mode_minutes">Minutes</string>
     <string name="target_time">Target time</string>
+    <string name="seconds">s</string>
     <string name="minutes">min</string>
     <string name="schedule">Schedule</string>
     <string name="no_scheduled_calls">No calls scheduled.</string>
@@ -52,6 +54,6 @@
 
     <!-- Errors / hints -->
     <string name="name_required">Name is required</string>
-    <string name="countdown_too_short">Minimum 1 minute</string>
+    <string name="countdown_too_short">Minimum 1 second</string>
     <string name="time_set_to_tomorrow">Time already passed — scheduled for tomorrow</string>
 </resources>

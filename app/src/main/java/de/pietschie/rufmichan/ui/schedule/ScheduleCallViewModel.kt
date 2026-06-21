@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-enum class ScheduleMode { COUNTDOWN, TARGET_TIME }
+enum class ScheduleMode { COUNTDOWN_SECONDS, COUNTDOWN_MINUTES, TARGET_TIME }
 
 class ScheduleCallViewModel(
     private val contactRepository: ContactRepository,
@@ -28,8 +28,11 @@ class ScheduleCallViewModel(
     private val _selectedContact = MutableStateFlow<ContactEntity?>(null)
     val selectedContact: StateFlow<ContactEntity?> = _selectedContact.asStateFlow()
 
-    private val _mode = MutableStateFlow(ScheduleMode.COUNTDOWN)
+    private val _mode = MutableStateFlow(ScheduleMode.COUNTDOWN_SECONDS)
     val mode: StateFlow<ScheduleMode> = _mode.asStateFlow()
+
+    private val _countdownSeconds = MutableStateFlow(10)
+    val countdownSeconds: StateFlow<Int> = _countdownSeconds.asStateFlow()
 
     private val _countdownMinutes = MutableStateFlow(5)
     val countdownMinutes: StateFlow<Int> = _countdownMinutes.asStateFlow()
@@ -58,6 +61,7 @@ class ScheduleCallViewModel(
 
     fun selectContact(contact: ContactEntity) { _selectedContact.value = contact }
     fun setMode(m: ScheduleMode) { _mode.value = m }
+    fun setCountdownSeconds(s: Int) { _countdownSeconds.value = s.coerceAtLeast(1) }
     fun setCountdownMinutes(m: Int) { _countdownMinutes.value = m.coerceAtLeast(1) }
     fun setTargetHour(h: Int) { _targetHour.value = h }
     fun setTargetMinute(m: Int) { _targetMinute.value = m }
@@ -66,7 +70,12 @@ class ScheduleCallViewModel(
         val contact = _selectedContact.value ?: return
 
         val triggerAt: Long = when (_mode.value) {
-            ScheduleMode.COUNTDOWN -> {
+            ScheduleMode.COUNTDOWN_SECONDS -> {
+                val secs = _countdownSeconds.value
+                if (secs < 1) return
+                System.currentTimeMillis() + secs * 1_000L
+            }
+            ScheduleMode.COUNTDOWN_MINUTES -> {
                 val mins = _countdownMinutes.value
                 if (mins < 1) return
                 System.currentTimeMillis() + mins * 60_000L

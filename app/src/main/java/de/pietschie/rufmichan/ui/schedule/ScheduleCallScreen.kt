@@ -69,6 +69,7 @@ fun ScheduleCallScreen(
     val contacts by vm.contacts.collectAsStateWithLifecycle()
     val selected by vm.selectedContact.collectAsStateWithLifecycle()
     val mode by vm.mode.collectAsStateWithLifecycle()
+    val countdownSeconds by vm.countdownSeconds.collectAsStateWithLifecycle()
     val countdownMinutes by vm.countdownMinutes.collectAsStateWithLifecycle()
     val targetHour by vm.targetHour.collectAsStateWithLifecycle()
     val targetMinute by vm.targetMinute.collectAsStateWithLifecycle()
@@ -163,7 +164,7 @@ fun ScheduleCallScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Mode selector: Countdown / Target time
+            // Mode selector: Seconds / Minutes / Target time
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 ScheduleMode.entries.forEachIndexed { idx, m ->
                     SegmentedButton(
@@ -172,8 +173,11 @@ fun ScheduleCallScreen(
                         shape = SegmentedButtonDefaults.itemShape(idx, ScheduleMode.entries.size),
                         label = {
                             Text(
-                                if (m == ScheduleMode.COUNTDOWN) stringResource(R.string.countdown)
-                                else stringResource(R.string.target_time)
+                                when (m) {
+                                    ScheduleMode.COUNTDOWN_SECONDS -> stringResource(R.string.mode_seconds)
+                                    ScheduleMode.COUNTDOWN_MINUTES -> stringResource(R.string.mode_minutes)
+                                    ScheduleMode.TARGET_TIME -> stringResource(R.string.target_time)
+                                }
                             )
                         }
                     )
@@ -182,13 +186,18 @@ fun ScheduleCallScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            if (mode == ScheduleMode.COUNTDOWN) {
-                CountdownInput(
-                    minutes = countdownMinutes,
-                    onMinutesChange = vm::setCountdownMinutes
+            when (mode) {
+                ScheduleMode.COUNTDOWN_SECONDS -> CountdownInput(
+                    value = countdownSeconds,
+                    onValueChange = vm::setCountdownSeconds,
+                    suffix = stringResource(R.string.seconds)
                 )
-            } else {
-                TimePicker(state = timePickerState)
+                ScheduleMode.COUNTDOWN_MINUTES -> CountdownInput(
+                    value = countdownMinutes,
+                    onValueChange = vm::setCountdownMinutes,
+                    suffix = stringResource(R.string.minutes)
+                )
+                ScheduleMode.TARGET_TIME -> TimePicker(state = timePickerState)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -207,13 +216,12 @@ fun ScheduleCallScreen(
 }
 
 @Composable
-private fun CountdownInput(minutes: Int, onMinutesChange: (Int) -> Unit) {
+private fun CountdownInput(value: Int, onValueChange: (Int) -> Unit, suffix: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         OutlinedTextField(
-            value = minutes.toString(),
-            onValueChange = { v -> v.toIntOrNull()?.let { onMinutesChange(it) } },
-            label = { Text(stringResource(R.string.countdown)) },
-            suffix = { Text(stringResource(R.string.minutes)) },
+            value = value.toString(),
+            onValueChange = { v -> v.toIntOrNull()?.let { onValueChange(it) } },
+            suffix = { Text(suffix) },
             singleLine = true,
             modifier = Modifier.width(180.dp)
         )
