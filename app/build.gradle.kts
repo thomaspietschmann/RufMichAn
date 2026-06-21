@@ -68,6 +68,10 @@ dependencies {
     // Material Components: only needed for the XML window theme (Theme.Material3.DayNight.NoActionBar)
     implementation(libs.material)
     implementation(libs.coil.compose)
+    // DataStore for persisting settings (theme + language)
+    implementation(libs.androidx.datastore.preferences)
+    // AppCompat enables per-app language switching backport on API 26–32
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
