@@ -65,6 +65,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    // Material Components: only needed for the XML window theme (Theme.Material3.DayNight.NoActionBar)
+    implementation(libs.material)
     implementation(libs.coil.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
