@@ -128,6 +128,27 @@ class CallActivity : ComponentActivity() {
         }
     }
 
+    // Q8: Handle re-delivery to this singleInstance activity from notification actions
+    // (answer/decline tapped while the activity is already alive) or a second call arriving.
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val newCallId = intent.getLongExtra(EXTRA_CALL_ID, -1L)
+        val autoAnswer = intent.getBooleanExtra(EXTRA_AUTO_ANSWER, false)
+        if (newCallId == -1L) return
+
+        callId = newCallId
+        answered = false
+        contact = null
+
+        activityScope.launch {
+            val repo = (application as RufMichAnApp).container.callRepository
+            val cwc = repo.getCallWithContact(callId)
+            contact = cwc?.contact
+            if (autoAnswer) onAnswer()
+        }
+    }
+
     override fun onDestroy() {
         proximityController.release()
         activityScope.cancel()

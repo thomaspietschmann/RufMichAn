@@ -31,6 +31,9 @@ interface ScheduledCallDao {
     @Query("UPDATE scheduled_calls SET state = :state WHERE id = :id")
     suspend fun updateState(id: Long, state: CallState)
 
+    @Query("DELETE FROM scheduled_calls WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
     @Delete
     suspend fun delete(call: ScheduledCallEntity)
 }

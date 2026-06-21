@@ -11,8 +11,13 @@ class CallScheduler(private val context: Context) {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
     /** Arms an AlarmManager.setAlarmClock for the given call. The row id is used as the
-     *  PendingIntent request code so that individual alarms can be cancelled precisely. */
+     *  PendingIntent request code so that individual alarms can be cancelled precisely.
+     *  @throws SecurityException if exact-alarm permission has been revoked (API 31/32). */
     fun schedule(callId: Long, triggerAtEpochMillis: Long) {
+        // Q10: Guard before scheduling so callers can handle the permission-revoked case.
+        if (!ExactAlarmPermission.canScheduleExactAlarms(context)) {
+            throw SecurityException("Exact alarm permission not granted")
+        }
         val receiverIntent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra(AlarmReceiver.EXTRA_CALL_ID, callId)
         }

@@ -75,6 +75,7 @@ fun ScheduleCallScreen(
     val targetMinute by vm.targetMinute.collectAsStateWithLifecycle()
     val done by vm.done.collectAsStateWithLifecycle()
     val rolledToTomorrow by vm.rolledToTomorrow.collectAsStateWithLifecycle()
+    val scheduleError by vm.scheduleError.collectAsStateWithLifecycle()
 
     LaunchedEffect(done) { if (done) onScheduled() }
 
@@ -83,6 +84,10 @@ fun ScheduleCallScreen(
     val tomorrowMsg = stringResource(R.string.time_set_to_tomorrow)
     LaunchedEffect(rolledToTomorrow) {
         if (rolledToTomorrow) scope.launch { snackbarHostState.showSnackbar(tomorrowMsg) }
+    }
+    LaunchedEffect(scheduleError) {
+        val err = scheduleError
+        if (err != null) scope.launch { snackbarHostState.showSnackbar(err) }
     }
 
     var contactExpanded by remember { mutableStateOf(false) }

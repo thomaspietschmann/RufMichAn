@@ -51,6 +51,10 @@ class ScheduleCallViewModel(
     private val _rolledToTomorrow = MutableStateFlow(false)
     val rolledToTomorrow: StateFlow<Boolean> = _rolledToTomorrow.asStateFlow()
 
+    /** Non-null when scheduling failed (e.g. exact-alarm permission revoked). Reset after read. */
+    private val _scheduleError = MutableStateFlow<String?>(null)
+    val scheduleError: StateFlow<String?> = _scheduleError.asStateFlow()
+
     init {
         if (preselectedContactId != null) {
             viewModelScope.launch {
@@ -84,14 +88,21 @@ class ScheduleCallViewModel(
         }
 
         viewModelScope.launch {
-            callRepository.schedule(contact.id, triggerAt)
-            _done.value = true
+            try {
+                callRepository.schedule(contact.id, triggerAt)
+                _done.value = true
+            } catch (e: SecurityException) {
+                // Q10: exact-alarm permission was revoked — surface the error to the UI.
+                _scheduleError.value = e.message ?: "Exact alarm permission not granted"
+            }
         }
     }
 
     /** Resolves the user-chosen HH:MM to an absolute epoch millis.
      *  If the time has already passed today, rolls to tomorrow. */
     private fun resolveTargetTime(): Long {
+        // Q9: Reset the flag first so repeat calls never show a stale snackbar.
+        _rolledToTomorrow.value = false
         val cal = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, _targetHour.value)
             set(Calendar.MINUTE, _targetMinute.value)

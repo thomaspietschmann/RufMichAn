@@ -9,7 +9,9 @@ class CallRepository(
 ) {
     val activeCalls: Flow<List<CallWithContact>> = scheduledCallDao.getActiveCallsWithContact()
 
-    /** Writes a new scheduled-call row and arms the alarm. Returns the new row id. */
+    /** Writes a new scheduled-call row and arms the alarm. Returns the new row id.
+     *  @throws SecurityException (forwarded from CallScheduler) if exact-alarm permission
+     *  has been revoked — in that case the inserted row is rolled back automatically. */
     suspend fun schedule(contactId: Long, triggerAtEpochMillis: Long): Long {
         val entity = ScheduledCallEntity(
             contactId = contactId,
@@ -18,7 +20,14 @@ class CallRepository(
             createdAtEpochMillis = System.currentTimeMillis()
         )
         val id = scheduledCallDao.insert(entity)
-        callScheduler.schedule(id, triggerAtEpochMillis)
+        try {
+            // Q10: arm the alarm AFTER inserting the row (we need the id for the PendingIntent).
+            // On failure, roll the row back so no orphaned "scheduled" row is left behind.
+            callScheduler.schedule(id, triggerAtEpochMillis)
+        } catch (e: SecurityException) {
+            scheduledCallDao.deleteById(id)
+            throw e
+        }
         return id
     }
 
