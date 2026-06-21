@@ -21,10 +21,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
+import androidx.core.os.LocaleListCompat
 import de.pietschie.rufmichan.alarm.ExactAlarmPermission
 import de.pietschie.rufmichan.ui.navigation.RufMichAnNavHost
 import de.pietschie.rufmichan.ui.theme.RufMichAnTheme
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
 
@@ -33,6 +37,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val app = application as RufMichAnApp
+
+        // Restore the persisted language choice before the UI inflates so there's no flicker.
+        // runBlocking is acceptable here because DataStore reads from disk at most once (cached).
+        val savedTag = runBlocking { app.container.settingsRepository.languageTag.first() }
+        if (savedTag.isNotEmpty()) {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(savedTag))
+        }
 
         setContent {
             RufMichAnTheme {

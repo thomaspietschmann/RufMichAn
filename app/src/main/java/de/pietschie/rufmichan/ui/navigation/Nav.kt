@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Contacts
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -26,16 +27,18 @@ import de.pietschie.rufmichan.ui.contacts.ContactEditScreen
 import de.pietschie.rufmichan.ui.contacts.ContactListScreen
 import de.pietschie.rufmichan.ui.schedule.ScheduleCallScreen
 import de.pietschie.rufmichan.ui.schedule.ScheduledListScreen
+import de.pietschie.rufmichan.ui.settings.SettingsScreen
 
 private sealed class TopDest(val route: String, val labelRes: Int) {
     object Contacts : TopDest("contacts", R.string.contacts)
     object Scheduled : TopDest("scheduled", R.string.scheduled)
+    object Settings : TopDest("settings", R.string.settings)
 }
 
 @Composable
 fun RufMichAnNavHost() {
     val navController = rememberNavController()
-    val topDests = listOf(TopDest.Contacts, TopDest.Scheduled)
+    val topDests = listOf(TopDest.Contacts, TopDest.Scheduled, TopDest.Settings)
 
     Scaffold(
         bottomBar = {
@@ -50,6 +53,7 @@ fun RufMichAnNavHost() {
                                 when (dest) {
                                     is TopDest.Contacts -> Icon(Icons.Filled.Contacts, contentDescription = null)
                                     is TopDest.Scheduled -> Icon(Icons.Filled.AccessTime, contentDescription = null)
+                                    is TopDest.Settings -> Icon(Icons.Filled.Settings, contentDescription = null)
                                 }
                             },
                             label = { Text(stringResource(dest.labelRes)) },
@@ -106,6 +110,9 @@ fun RufMichAnNavHost() {
                     onScheduled = { navController.popBackStack() },
                     onCancel = { navController.popBackStack() }
                 )
+            }
+            composable(TopDest.Settings.route) {
+                SettingsScreen()
             }
         }
     }
