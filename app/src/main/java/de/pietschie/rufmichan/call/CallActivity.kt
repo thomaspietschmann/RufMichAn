@@ -98,13 +98,13 @@ class CallActivity : ComponentActivity() {
 
     private fun onAnswer() {
         answered = true
-        stopCallService(stopRinging = true)
+        stopCallService()
         proximityController.acquire()
     }
 
     private fun onDecline() {
         markCompleted()
-        stopCallService(stopRinging = true)
+        stopCallService()
         finish()
     }
 
@@ -114,14 +114,12 @@ class CallActivity : ComponentActivity() {
         finish()
     }
 
-    private fun stopCallService(stopRinging: Boolean) {
-        if (stopRinging) {
-            val stopIntent = Intent(this, CallService::class.java).apply {
-                putExtra(CallService.EXTRA_CALL_ID, callId)
-                putExtra(CallService.EXTRA_ACTION, CallService.ACTION_STOP)
-            }
-            startService(stopIntent)
+    private fun stopCallService() {
+        val stopIntent = Intent(this, CallService::class.java).apply {
+            putExtra(CallService.EXTRA_CALL_ID, callId)
+            putExtra(CallService.EXTRA_ACTION, CallService.ACTION_STOP)
         }
+        startService(stopIntent)
     }
 
     private fun markCompleted() {

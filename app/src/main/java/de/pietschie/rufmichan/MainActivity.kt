@@ -1,9 +1,7 @@
 package de.pietschie.rufmichan
 
 import android.Manifest
-import android.app.NotificationManager
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
@@ -13,11 +11,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,8 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import de.pietschie.rufmichan.alarm.ExactAlarmPermission
 import de.pietschie.rufmichan.ui.navigation.RufMichAnNavHost
 import de.pietschie.rufmichan.ui.theme.RufMichAnTheme
@@ -47,23 +41,17 @@ class MainActivity : ComponentActivity() {
                     var showBatteryDialog by remember { mutableStateOf(false) }
                     var showExactAlarmDialog by remember { mutableStateOf(false) }
 
-                    // Request POST_NOTIFICATIONS on Android 13+
                     val notifLauncher = rememberLauncherForActivityResult(
                         ActivityResultContracts.RequestPermission()
-                    ) { /* granted or denied — UI will indicate when scheduling */ }
+                    ) { /* result handled implicitly — scheduling UI shows a hint if denied */ }
 
                     LaunchedEffect(Unit) {
-                        // Ask for notification permission (Android 13+)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         }
-
-                        // Prompt for exact alarm permission (Android 12/12L)
                         if (!ExactAlarmPermission.canScheduleExactAlarms(this@MainActivity)) {
                             showExactAlarmDialog = true
                         }
-
-                        // Suggest battery optimisation exemption (once per install, low-priority)
                         val pm = getSystemService(PowerManager::class.java)
                         if (!pm.isIgnoringBatteryOptimizations(packageName)) {
                             showBatteryDialog = true
@@ -98,11 +86,12 @@ class MainActivity : ComponentActivity() {
                                 TextButton(onClick = {
                                     showBatteryDialog = false
                                     @Suppress("BatteryLife")
-                                    val intent = Intent(
-                                        Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                                        Uri.parse("package:$packageName")
+                                    startActivity(
+                                        Intent(
+                                            Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                                            "package:$packageName".toUri()
+                                        )
                                     )
-                                    startActivity(intent)
                                 }) { Text(stringResource(R.string.open_settings)) }
                             },
                             dismissButton = {

@@ -5,7 +5,6 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import de.pietschie.rufmichan.data.call.CallWithContact
 import de.pietschie.rufmichan.data.call.ScheduledCallDao
 import de.pietschie.rufmichan.data.call.ScheduledCallEntity
 import de.pietschie.rufmichan.data.contact.ContactDao

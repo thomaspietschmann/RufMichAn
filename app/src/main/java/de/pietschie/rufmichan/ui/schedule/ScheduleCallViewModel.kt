@@ -40,12 +40,6 @@ class ScheduleCallViewModel(
     private val _targetMinute = MutableStateFlow(0)
     val targetMinute: StateFlow<Int> = _targetMinute.asStateFlow()
 
-    private val _scheduledAt = MutableStateFlow<Long?>(null)
-    val scheduledAt: StateFlow<Long?> = _scheduledAt.asStateFlow()
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
-
     /** Set to true after a successful schedule so the screen can navigate away. */
     private val _done = MutableStateFlow(false)
     val done: StateFlow<Boolean> = _done.asStateFlow()
@@ -69,12 +63,12 @@ class ScheduleCallViewModel(
     fun setTargetMinute(m: Int) { _targetMinute.value = m }
 
     fun schedule() {
-        val contact = _selectedContact.value ?: run { _error.value = "No contact selected"; return }
+        val contact = _selectedContact.value ?: return
 
         val triggerAt: Long = when (_mode.value) {
             ScheduleMode.COUNTDOWN -> {
                 val mins = _countdownMinutes.value
-                if (mins < 1) { _error.value = "countdown_too_short"; return }
+                if (mins < 1) return
                 System.currentTimeMillis() + mins * 60_000L
             }
             ScheduleMode.TARGET_TIME -> resolveTargetTime()
@@ -82,7 +76,6 @@ class ScheduleCallViewModel(
 
         viewModelScope.launch {
             callRepository.schedule(contact.id, triggerAt)
-            _scheduledAt.value = triggerAt
             _done.value = true
         }
     }

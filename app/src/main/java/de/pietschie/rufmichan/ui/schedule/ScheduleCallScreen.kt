@@ -26,7 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -43,16 +42,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.pietschie.rufmichan.LocalAppContainer
 import de.pietschie.rufmichan.R
 import de.pietschie.rufmichan.call.ui.ContactAvatar
-import de.pietschie.rufmichan.data.contact.ContactEntity
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -169,11 +165,11 @@ fun ScheduleCallScreen(
 
             // Mode selector: Countdown / Target time
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                ScheduleMode.values().forEachIndexed { idx, m ->
+                ScheduleMode.entries.forEachIndexed { idx, m ->
                     SegmentedButton(
                         selected = mode == m,
                         onClick = { vm.setMode(m) },
-                        shape = SegmentedButtonDefaults.itemShape(idx, ScheduleMode.values().size),
+                        shape = SegmentedButtonDefaults.itemShape(idx, ScheduleMode.entries.size),
                         label = {
                             Text(
                                 if (m == ScheduleMode.COUNTDOWN) stringResource(R.string.countdown)

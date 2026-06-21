@@ -68,7 +68,7 @@ class Ringer(private val context: Context) {
             player.prepare()
             player.start()
             mediaPlayer = player
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Cannot play ringtone — vibration-only fallback is already started if applicable.
         }
     }
