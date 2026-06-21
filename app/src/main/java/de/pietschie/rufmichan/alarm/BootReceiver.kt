@@ -31,6 +31,8 @@ class BootReceiver : BroadcastReceiver() {
                         app.container.callRepository.markMissed(call.id)
                     }
                 }
+                // Clear calls interrupted by the reboot and re-arm any that were waiting.
+                app.container.callRepository.recoverInterruptedCalls()
             } finally {
                 pending.finish()
             }

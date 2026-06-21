@@ -1,6 +1,6 @@
 package de.pietschie.rufmichan.call
 
-import android.app.NotificationManager
+import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
@@ -24,6 +24,12 @@ class CallService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var ringer: Ringer? = null
 
+    // The call this service instance is currently presenting (-1 = none yet) and its
+    // posted notification. Used to keep an in-progress call untouched when a second
+    // call's alarm reaches this same running instance.
+    private var activeCallId: Long = -1L
+    private var activeNotification: Notification? = null
+
     override fun onCreate() {
         super.onCreate()
         ringer = Ringer(this)
@@ -43,36 +49,75 @@ class CallService : Service() {
             )
             @Suppress("DEPRECATION")
             stopForeground(true)
+            // Decline from the notification ends the call without any UI, so complete it
+            // (and promote a waiting call) here. ACTION_STOP comes from CallActivity, which
+            // already completes the call itself when appropriate. Use the application scope
+            // because stopSelf() cancels this service's own scope.
+            if (action == ACTION_DECLINE && callId != -1L) {
+                val container = (application as RufMichAnApp).container
+                container.applicationScope.launch {
+                    container.callRepository.completeAndPromoteWaiting(callId)
+                }
+            }
             stopSelf()
             return START_NOT_STICKY
         }
 
-        // Normal call-start path: post the notification with FSI immediately using a
-        // generic title, then update it with the real contact name asynchronously.
+        // A different call is already ringing on THIS instance: defer the new one and keep
+        // the current call's notification, ringer and full-screen UI completely untouched.
+        if (activeCallId != -1L && activeCallId != callId) {
+            startForeground(
+                CallNotifications.NOTIFICATION_ID,
+                activeNotification ?: CallNotifications.buildPlaceholderNotification(this)
+            )
+            val repo = (application as RufMichAnApp).container.callRepository
+            serviceScope.launch { repo.markWaiting(callId) }
+            return START_NOT_STICKY
+        }
+
+        // Fresh instance: a call may still be active (answered/in-call) even though no
+        // service is running for it, so post a silent placeholder and decide once we have
+        // queried the DB. Only then do we post the FSI notification and start ringing.
         startForeground(
             CallNotifications.NOTIFICATION_ID,
-            CallNotifications.buildIncomingCallNotification(
-                this, getString(R.string.incoming_call), callId
-            )
+            CallNotifications.buildPlaceholderNotification(this)
         )
 
         val repo = (application as RufMichAnApp).container.callRepository
         serviceScope.launch {
+            // Defer if another call is in progress, or if this instance was meanwhile claimed
+            // for a different call (two alarms firing within the same instant).
+            val instanceBusy = activeCallId != -1L && activeCallId != callId
+            if (instanceBusy || repo.getActiveCallIdExcluding(callId) != null) {
+                repo.markWaiting(callId)
+                if (instanceBusy) {
+                    // Keep this instance alive for the call it is already presenting.
+                    activeNotification?.let {
+                        startForeground(CallNotifications.NOTIFICATION_ID, it)
+                    }
+                } else {
+                    @Suppress("DEPRECATION")
+                    stopForeground(true)
+                    stopSelf()
+                }
+                return@launch
+            }
+
             val callWithContact = repo.getCallWithContact(callId)
             val contactName = callWithContact?.contact?.name
                 ?: getString(R.string.unknown_caller)
 
-            // Update notification text with the real contact name.
+            // Post the real notification (carries the full-screen intent → CallActivity).
             val notification = CallNotifications.buildIncomingCallNotification(
                 this@CallService, contactName, callId
             )
-            getSystemService(NotificationManager::class.java)
-                ?.notify(CallNotifications.NOTIFICATION_ID, notification)
+            activeNotification = notification
+            startForeground(CallNotifications.NOTIFICATION_ID, notification)
+            activeCallId = callId
 
             repo.markFired(callId)
+            ringer?.start()
         }
-
-        ringer?.start()
 
         return START_NOT_STICKY
     }

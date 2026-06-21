@@ -9,6 +9,14 @@
     <string name="hang_up">Raccrocher</string>
     <string name="call_ended">Appel terminé</string>
     <string name="mobile">Mobile</string>
+    <string name="action_mute">Muet</string>
+    <string name="action_keypad">Clavier</string>
+    <string name="action_speaker">Haut-parleur</string>
+    <string name="action_add_call">Ajouter</string>
+    <string name="action_hold">Attente</string>
+    <string name="action_video">Vidéo</string>
+    <string name="action_bluetooth">Bluetooth</string>
+    <string name="action_record">Enregistrer</string>
     <string name="contacts">Contacts</string>
     <string name="add_contact">Ajouter un contact</string>
     <string name="edit_contact">Modifier le contact</string>

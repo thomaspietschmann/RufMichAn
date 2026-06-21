@@ -28,6 +28,11 @@ data class CallTheme(
     val buttonShape: Shape,
     val buttonSize: Dp,
     val buttonIconSize: Dp,
+    // Secondary in-call action buttons (mute, keypad, speaker, …).
+    val secondaryButtonColor: Color,
+    val secondaryButtonActiveColor: Color,
+    val secondaryIconTint: Color,
+    val secondaryIconActiveTint: Color,
     val nameFontSize: TextUnit,
     val nameFontWeight: FontWeight,
     val inCallNameFontSize: TextUnit,
@@ -52,6 +57,10 @@ fun CallStyle.toCallTheme(): CallTheme = when (this) {
         nameFontSize = 32.sp,
         nameFontWeight = FontWeight.Light,
         inCallNameFontSize = 28.sp,
+        secondaryButtonColor = Color(0x22FFFFFF),
+        secondaryButtonActiveColor = Color.White,
+        secondaryIconTint = Color(0xFFE6E6E6),
+        secondaryIconActiveTint = Color(0xFF1A1C1A),
     )
 
     CallStyle.PIXEL -> CallTheme(
@@ -72,6 +81,10 @@ fun CallStyle.toCallTheme(): CallTheme = when (this) {
         nameFontSize = 34.sp,
         nameFontWeight = FontWeight.Medium,
         inCallNameFontSize = 30.sp,
+        secondaryButtonColor = Color(0x1FFFFFFF),
+        secondaryButtonActiveColor = Color(0xFFE2E2E5),
+        secondaryIconTint = Color(0xFFE2E2E5),
+        secondaryIconActiveTint = Color(0xFF1B1B1F),
     )
 
     CallStyle.SAMSUNG -> CallTheme(
@@ -92,6 +105,10 @@ fun CallStyle.toCallTheme(): CallTheme = when (this) {
         nameFontSize = 30.sp,
         nameFontWeight = FontWeight.SemiBold,
         inCallNameFontSize = 26.sp,
+        secondaryButtonColor = Color(0x26FFFFFF),
+        secondaryButtonActiveColor = Color(0xFF1BA1E2),
+        secondaryIconTint = Color.White,
+        secondaryIconActiveTint = Color.White,
     )
 
     CallStyle.MIUI -> CallTheme(
@@ -112,6 +129,10 @@ fun CallStyle.toCallTheme(): CallTheme = when (this) {
         nameFontSize = 32.sp,
         nameFontWeight = FontWeight.Normal,
         inCallNameFontSize = 28.sp,
+        secondaryButtonColor = Color(0x1FFFFFFF),
+        secondaryButtonActiveColor = Color(0xFFFF6900),
+        secondaryIconTint = Color(0xFFF0E8DE),
+        secondaryIconActiveTint = Color.White,
     )
 
     CallStyle.ONEPLUS -> CallTheme(
@@ -132,5 +153,9 @@ fun CallStyle.toCallTheme(): CallTheme = when (this) {
         nameFontSize = 33.sp,
         nameFontWeight = FontWeight.Light,
         inCallNameFontSize = 28.sp,
+        secondaryButtonColor = Color(0x18FFFFFF),
+        secondaryButtonActiveColor = Color(0xFFEB0029),
+        secondaryIconTint = Color(0xFFCCCCCC),
+        secondaryIconActiveTint = Color.White,
     )
 }

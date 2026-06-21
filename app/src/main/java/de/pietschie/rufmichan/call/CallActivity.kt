@@ -4,9 +4,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -34,13 +34,14 @@ import kotlinx.coroutines.launch
  *  - also started by the notification "Answer" action with EXTRA_AUTO_ANSWER=true
  *  - finishes when the user answers + hangs up, or declines
  */
-class CallActivity : ComponentActivity() {
+class CallActivity : AppCompatActivity() {
 
     private val activityScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private var callId: Long = -1L
     private var contact by mutableStateOf<ContactEntity?>(null)
     private var answered by mutableStateOf(false)
+    private var callStyle by mutableStateOf(CallStyle.SYSTEM)
     private var callTheme by mutableStateOf<CallTheme>(CallStyle.SYSTEM.toCallTheme())
 
     private lateinit var proximityController: ProximityController
@@ -76,6 +77,7 @@ class CallActivity : ComponentActivity() {
         activityScope.launch {
             val container = (application as RufMichAnApp).container
             val style = container.settingsRepository.callStyle.first()
+            callStyle = style
             callTheme = style.toCallTheme()
             val cwc = container.callRepository.getCallWithContact(callId)
             contact = cwc?.contact
@@ -90,6 +92,7 @@ class CallActivity : ComponentActivity() {
                         InCallScreen(
                             contact = c,
                             theme = callTheme,
+                            style = callStyle,
                             onHangUp = ::onHangUp
                         )
                     } else {
@@ -132,8 +135,12 @@ class CallActivity : ComponentActivity() {
     }
 
     private fun markCompleted() {
+        // Mark this call done and, if a second call had to wait for it, start that one
+        // after a short random delay so the calls never overlap.
+        val endedCallId = callId
         activityScope.launch(Dispatchers.IO) {
-            (application as RufMichAnApp).container.callRepository.markCompleted(callId)
+            (application as RufMichAnApp).container.callRepository
+                .completeAndPromoteWaiting(endedCallId)
         }
     }
 
@@ -153,6 +160,7 @@ class CallActivity : ComponentActivity() {
         activityScope.launch {
             val container = (application as RufMichAnApp).container
             val style = container.settingsRepository.callStyle.first()
+            callStyle = style
             callTheme = style.toCallTheme()
             val cwc = container.callRepository.getCallWithContact(callId)
             contact = cwc?.contact

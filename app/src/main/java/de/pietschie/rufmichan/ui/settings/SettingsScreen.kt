@@ -2,6 +2,8 @@ package de.pietschie.rufmichan.ui.settings
 
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.pietschie.rufmichan.LocalAppContainer
 import de.pietschie.rufmichan.R
+import de.pietschie.rufmichan.call.ui.CallStylePreview
 import de.pietschie.rufmichan.data.settings.CallStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,19 +56,29 @@ fun SettingsScreen() {
         ) {
             SectionHeader(stringResource(R.string.theme))
 
-            CallStyle.entries.forEach { style ->
-                val labelRes = when (style) {
-                    CallStyle.SYSTEM -> R.string.theme_system
-                    CallStyle.PIXEL -> R.string.theme_pixel
-                    CallStyle.SAMSUNG -> R.string.theme_samsung
-                    CallStyle.MIUI -> R.string.theme_miui
-                    CallStyle.ONEPLUS -> R.string.theme_oneplus
+            // Tappable design previews — see each call screen before choosing it.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                CallStyle.entries.forEach { style ->
+                    val labelRes = when (style) {
+                        CallStyle.SYSTEM -> R.string.theme_system
+                        CallStyle.PIXEL -> R.string.theme_pixel
+                        CallStyle.SAMSUNG -> R.string.theme_samsung
+                        CallStyle.MIUI -> R.string.theme_miui
+                        CallStyle.ONEPLUS -> R.string.theme_oneplus
+                    }
+                    CallStylePreview(
+                        style = style,
+                        label = stringResource(labelRes),
+                        selected = callStyle == style,
+                        onClick = { vm.setCallStyle(style) }
+                    )
                 }
-                RadioRow(
-                    label = stringResource(labelRes),
-                    selected = callStyle == style,
-                    onClick = { vm.setCallStyle(style) }
-                )
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))

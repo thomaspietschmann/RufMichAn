@@ -13,6 +13,16 @@
     <string name="call_ended">Call ended</string>
     <string name="mobile">Mobile</string>
 
+    <!-- In-call action buttons (presentation only) -->
+    <string name="action_mute">Mute</string>
+    <string name="action_keypad">Keypad</string>
+    <string name="action_speaker">Speaker</string>
+    <string name="action_add_call">Add call</string>
+    <string name="action_hold">Hold</string>
+    <string name="action_video">Video</string>
+    <string name="action_bluetooth">Bluetooth</string>
+    <string name="action_record">Record</string>
+
     <!-- Contacts -->
     <string name="contacts">Contacts</string>
     <string name="add_contact">Add contact</string>

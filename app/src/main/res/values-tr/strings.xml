@@ -9,6 +9,14 @@
     <string name="hang_up">Kapat</string>
     <string name="call_ended">Arama sona erdi</string>
     <string name="mobile">Cep telefonu</string>
+    <string name="action_mute">Sessiz</string>
+    <string name="action_keypad">Tuş takımı</string>
+    <string name="action_speaker">Hoparlör</string>
+    <string name="action_add_call">Çağrı ekle</string>
+    <string name="action_hold">Beklet</string>
+    <string name="action_video">Görüntülü</string>
+    <string name="action_bluetooth">Bluetooth</string>
+    <string name="action_record">Kaydet</string>
     <string name="contacts">Kişiler</string>
     <string name="add_contact">Kişi ekle</string>
     <string name="edit_contact">Kişiyi düzenle</string>

@@ -18,9 +18,11 @@ enum class CallStyle {
     ONEPLUS   // OnePlus style
 }
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+/** Production DataStore for settings. Injected into [SettingsRepository] so tests can supply
+ *  their own (e.g. a temp-file store). */
+val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-class SettingsRepository(private val context: Context) {
+class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     private object Keys {
         val CALL_STYLE = stringPreferencesKey("call_style")
@@ -28,21 +30,21 @@ class SettingsRepository(private val context: Context) {
     }
 
     /** The selected call-screen theme. Defaults to SYSTEM. */
-    val callStyle: Flow<CallStyle> = context.dataStore.data.map { prefs ->
+    val callStyle: Flow<CallStyle> = dataStore.data.map { prefs ->
         val raw = prefs[Keys.CALL_STYLE] ?: CallStyle.SYSTEM.name
         runCatching { CallStyle.valueOf(raw) }.getOrDefault(CallStyle.SYSTEM)
     }
 
     /** The selected BCP-47 language tag (e.g. "de", "es"). Empty string = follow OS. */
-    val languageTag: Flow<String> = context.dataStore.data.map { prefs ->
+    val languageTag: Flow<String> = dataStore.data.map { prefs ->
         prefs[Keys.LANGUAGE_TAG] ?: ""
     }
 
     suspend fun setCallStyle(style: CallStyle) {
-        context.dataStore.edit { prefs -> prefs[Keys.CALL_STYLE] = style.name }
+        dataStore.edit { prefs -> prefs[Keys.CALL_STYLE] = style.name }
     }
 
     suspend fun setLanguageTag(tag: String) {
-        context.dataStore.edit { prefs -> prefs[Keys.LANGUAGE_TAG] = tag }
+        dataStore.edit { prefs -> prefs[Keys.LANGUAGE_TAG] = tag }
     }
 }
