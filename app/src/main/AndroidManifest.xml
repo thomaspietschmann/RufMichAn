@@ -32,7 +32,7 @@
 
     <application
         android:name=".RufMichAnApp"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -83,9 +83,9 @@
         <receiver
             android:name=".alarm.BootReceiver"
             android:exported="true">
+            <!-- S2: Only BOOT_COMPLETED — app is not Direct-Boot-aware (Room is CE-encrypted). -->
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 

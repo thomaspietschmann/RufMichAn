@@ -18,8 +18,12 @@ class ProximityController(context: Context) {
         wakeLock = powerManager.newWakeLock(
             PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK,
             "RufMichAn:proximity"
-        )
-        wakeLock?.acquire()
+        ).also {
+            it.setReferenceCounted(false)
+            // Q7: Safety-net timeout (10 min) guards against a leak if onDestroy is skipped
+            // under memory pressure. The proximity sensor auto-releases normally before this.
+            it.acquire(10 * 60 * 1_000L)
+        }
     }
 
     fun release() {

@@ -13,31 +13,31 @@ import android.os.VibratorManager
 /** Plays the default ringtone and vibration pattern, respecting the ringer mode and DND. */
 class Ringer(private val context: Context) {
 
+    // @GuardedBy("lock")
+    private val lock = Any()
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
+    private var stopped = false
 
     private val audioManager = context.getSystemService(AudioManager::class.java)
 
-    /** Starts ringing. Must be called from any thread; stops only when [stop] is called. */
+    /** Starts ringing. Safe to call from the main thread — audio I/O runs off-thread. */
     fun start() {
         if (!shouldVibrate() && !shouldRing()) return
 
-        if (shouldVibrate()) {
-            startVibration()
-        }
-
-        if (shouldRing()) {
-            startRingtone()
-        }
+        if (shouldVibrate()) startVibration()
+        if (shouldRing()) startRingtone()
     }
 
     fun stop() {
-        mediaPlayer?.apply {
-            if (isPlaying) stop()
-            release()
+        synchronized(lock) {
+            stopped = true
+            mediaPlayer?.apply {
+                try { if (isPlaying) stop() } catch (_: Exception) {}
+                release()
+            }
+            mediaPlayer = null
         }
-        mediaPlayer = null
-
         vibrator?.cancel()
         vibrator = null
     }
@@ -51,8 +51,7 @@ class Ringer(private val context: Context) {
         audioManager.ringerMode != AudioManager.RINGER_MODE_SILENT
 
     private fun startRingtone() {
-        val ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
-            ?: return
+        val ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE) ?: return
 
         try {
             val player = MediaPlayer()
@@ -65,18 +64,33 @@ class Ringer(private val context: Context) {
             )
             player.setDataSource(context, ringtoneUri)
             player.isLooping = true
-            player.prepare()
-            player.start()
-            mediaPlayer = player
+
+            // Q3: use prepareAsync() so audio I/O never blocks the main thread.
+            player.setOnPreparedListener { mp ->
+                synchronized(lock) {
+                    if (stopped) {
+                        // stop() was called before prepare finished — clean up immediately.
+                        mp.release()
+                        return@setOnPreparedListener
+                    }
+                    mp.start()
+                    mediaPlayer = mp
+                }
+            }
+            player.setOnErrorListener { mp, _, _ ->
+                mp.release()
+                synchronized(lock) { if (mediaPlayer === mp) mediaPlayer = null }
+                true
+            }
+            player.prepareAsync()
         } catch (_: Exception) {
-            // Cannot play ringtone — vibration-only fallback is already started if applicable.
+            // Cannot prepare ringtone — vibration-only fallback already started if applicable.
         }
     }
 
     private fun startVibration() {
         val vib = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            (context.getSystemService(VibratorManager::class.java))
-                .defaultVibrator
+            context.getSystemService(VibratorManager::class.java).defaultVibrator
         } else {
             @Suppress("DEPRECATION")
             context.getSystemService(Vibrator::class.java)
