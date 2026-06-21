@@ -52,6 +52,24 @@
     <string name="battery_opt_msg">Exempting RufMichAn from battery optimisation ensures calls trigger reliably after long idle periods.</string>
     <string name="later">Later</string>
 
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="theme">Call screen theme</string>
+    <string name="language">Language</string>
+    <string name="system_default">System default</string>
+    <string name="theme_system">System (default)</string>
+    <string name="theme_pixel">Google Pixel</string>
+    <string name="theme_samsung">Samsung One UI</string>
+    <string name="theme_miui">Xiaomi MIUI</string>
+    <string name="theme_oneplus">OnePlus</string>
+    <string name="language_en">English</string>
+    <string name="language_es">Spanish</string>
+    <string name="language_de">German</string>
+    <string name="language_fr">French</string>
+    <string name="language_it">Italian</string>
+    <string name="language_tr">Turkish</string>
+    <string name="schedule_error_no_permission">Cannot schedule call: exact alarm permission not granted. Please allow it in Settings.</string>
+
     <!-- Errors / hints -->
     <string name="unknown_caller">Unknown caller</string>
     <string name="name_required">Name is required</string>

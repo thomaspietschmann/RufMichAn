@@ -43,9 +43,8 @@ import de.pietschie.rufmichan.R
 import de.pietschie.rufmichan.call.ui.ContactAvatar
 import de.pietschie.rufmichan.data.call.CallWithContact
 import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
+import java.text.DateFormat
 import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,18 +158,17 @@ private fun ScheduledCallCard(
     }
 }
 
-private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-private val dateTimeFormat = SimpleDateFormat("dd.MM HH:mm", Locale.getDefault())
-
 private fun formatAbsoluteTime(epochMillis: Long): String {
     val cal = java.util.Calendar.getInstance()
     val then = java.util.Calendar.getInstance().apply { timeInMillis = epochMillis }
     return if (cal.get(java.util.Calendar.DAY_OF_YEAR) == then.get(java.util.Calendar.DAY_OF_YEAR)
         && cal.get(java.util.Calendar.YEAR) == then.get(java.util.Calendar.YEAR)
     ) {
-        timeFormat.format(Date(epochMillis))
+        // Same day: show locale-aware short time only
+        DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(epochMillis))
     } else {
-        dateTimeFormat.format(Date(epochMillis))
+        // Different day: show locale-aware short date + short time
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(epochMillis))
     }
 }
 
