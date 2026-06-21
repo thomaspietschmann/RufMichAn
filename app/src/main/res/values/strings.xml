@@ -53,6 +53,7 @@
     <string name="later">Later</string>
 
     <!-- Errors / hints -->
+    <string name="unknown_caller">Unknown caller</string>
     <string name="name_required">Name is required</string>
     <string name="countdown_too_short">Minimum 1 second</string>
     <string name="time_set_to_tomorrow">Time already passed — scheduled for tomorrow</string>

@@ -33,6 +33,18 @@ object CallNotifications {
         }
     }
 
+    /** Minimal notification used only to satisfy the FGS 5-second contract on stop/error paths
+     *  before the service calls stopForeground(). Never shown to the user for more than a few ms. */
+    fun buildPlaceholderNotification(context: Context): Notification {
+        return NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_call)
+            .setContentTitle(context.getString(R.string.incoming_call))
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setSilent(true)
+            .build()
+    }
+
     fun buildIncomingCallNotification(
         context: Context,
         contactName: String,

@@ -1,8 +1,10 @@
 package de.pietschie.rufmichan.call
 
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import de.pietschie.rufmichan.R
 import de.pietschie.rufmichan.RufMichAnApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +23,6 @@ class CallService : Service() {
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var ringer: Ringer? = null
-    private var currentCallId: Long = -1L
 
     override fun onCreate() {
         super.onCreate()
@@ -32,28 +33,41 @@ class CallService : Service() {
         val callId = intent?.getLongExtra(EXTRA_CALL_ID, -1L) ?: -1L
         val action = intent?.getStringExtra(EXTRA_ACTION)
 
-        if (action == ACTION_DECLINE || action == ACTION_STOP) {
+        // Q1+Q2: Always call startForeground() FIRST, synchronously, to satisfy the
+        // 5-second FGS contract on every code path (including stop/decline paths).
+        if (action == ACTION_DECLINE || action == ACTION_STOP || callId == -1L) {
+            // Stop paths: post a silent placeholder and immediately remove it.
+            startForeground(
+                CallNotifications.NOTIFICATION_ID,
+                CallNotifications.buildPlaceholderNotification(this)
+            )
+            @Suppress("DEPRECATION")
+            stopForeground(true)
             stopSelf()
             return START_NOT_STICKY
         }
 
-        if (callId == -1L) {
-            stopSelf()
-            return START_NOT_STICKY
-        }
+        // Normal call-start path: post the notification with FSI immediately using a
+        // generic title, then update it with the real contact name asynchronously.
+        startForeground(
+            CallNotifications.NOTIFICATION_ID,
+            CallNotifications.buildIncomingCallNotification(
+                this, getString(R.string.incoming_call), callId
+            )
+        )
 
-        currentCallId = callId
-
-        // Post the notification as quickly as possible to satisfy foreground-service rules.
         val repo = (application as RufMichAnApp).container.callRepository
         serviceScope.launch {
             val callWithContact = repo.getCallWithContact(callId)
-            val contactName = callWithContact?.contact?.name ?: "Unknown"
+            val contactName = callWithContact?.contact?.name
+                ?: getString(R.string.unknown_caller)
 
+            // Update notification text with the real contact name.
             val notification = CallNotifications.buildIncomingCallNotification(
                 this@CallService, contactName, callId
             )
-            startForeground(CallNotifications.NOTIFICATION_ID, notification)
+            getSystemService(NotificationManager::class.java)
+                ?.notify(CallNotifications.NOTIFICATION_ID, notification)
 
             repo.markFired(callId)
         }
@@ -63,7 +77,6 @@ class CallService : Service() {
         return START_NOT_STICKY
     }
 
-    /** Called by CallActivity when the user answers or declines. */
     override fun onDestroy() {
         super.onDestroy()
         ringer?.stop()
