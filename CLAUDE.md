@@ -15,10 +15,10 @@ Simulates incoming phone calls from user-defined contacts at a scheduled time. C
 ./gradlew assembleRelease      # release APK
 ```
 
-- **minSdk 26** (Android 8), **compileSdk/targetSdk 35**
-- Kotlin 2.1, AGP 8.7.3, Gradle 8.11.1 — pinned for F-Droid compatibility
+- **minSdk 26** (Android 8), **compileSdk 37**, **targetSdk 36**
+- Kotlin 2.4 (AGP built-in Kotlin), AGP 9.4, Gradle 9.7
 - Jetpack Compose + Material 3 (no XML layouts)
-- Room 2.6 via KSP, Coil 2.7, Navigation Compose 2.8
+- Room 2.8 via KSP, Coil 2.7, Navigation Compose 2.10
 
 ## Package layout
 

@@ -1,18 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "de.pietschie.rufmichan"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "de.pietschie.rufmichan"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         // CI can override version via -PversionCode=N -PversionName=X.Y.Z
         versionCode = (findProperty("versionCode") as? String)?.toIntOrNull() ?: 1
         versionName = (findProperty("versionName") as? String) ?: "1.0"
@@ -51,12 +50,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
-        }
-    }
-
     buildFeatures {
         compose = true
     }
@@ -69,6 +62,12 @@ android {
 
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
